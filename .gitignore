@@ -1,0 +1,15 @@
+# meta
+.vscode/
+__pycache__/
+
+# thesis
+thesis/*
+!thesis/*.cmd
+
+# generated
+gen/
+out/
+
+# logs
+log/
+*.log
