@@ -24,6 +24,7 @@ Team Name: 一个十连当场失忆
   - (ROME) Locating and Editing Factual Associations in GPT: https://arxiv.org/abs/2202.05262v5
   - UnKE: Unstructured Knowledge Editing in Large Language Models: https://arxiv.org/abs/2405.15349
 - repo
+  - KnowledgeEditingPapers: https://github.com/zjunlp/KnowledgeEditingPapers
   - EasyEdit: https://github.com/zjunlp/EasyEdit
   - ROME: https://github.com/kmeng01/rome
   - MEMIT: https://github.com/kmeng01/memit

@@ -17,3 +17,6 @@ out/
 # logs
 log/
 *.log
+
+# info
+TEAM.txt
