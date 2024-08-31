@@ -412,7 +412,7 @@ if __name__ == "__main__":
     model = AutoModelForCausalLM.from_pretrained(
         config.model_path,
         device_map=f"cuda:{config.device}",
-        torch_dtype=torch.float16, 
+        torch_dtype=torch.bfloat16, 
         low_cpu_mem_usage=True,
     )
     tok = AutoTokenizer.from_pretrained(config.model_path)
