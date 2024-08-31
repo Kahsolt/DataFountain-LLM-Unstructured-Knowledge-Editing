@@ -13,6 +13,13 @@ Team Name: 一个十连当场失忆
 - ???
 
 
+### Experiments
+
+| model | method | submit score |
+| :-: | :-: | :-: |
+| Qwen1.5-7B-Chat | dummy | 0.44495002693 |
+
+
 #### refenrence
 
 - blog
