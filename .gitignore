@@ -12,6 +12,7 @@ repo/*
 
 # logs
 log/
+logs/
 *.log
 
 # info

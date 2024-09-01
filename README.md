@@ -27,6 +27,7 @@ Team Name: 一个十连当场失忆
   - Knowledge Editing for LLMs文献梳理: https://blog.csdn.net/m0_57385293/article/details/135201207
 - thesis
   - Editing Large Language Models: Problems, Methods, and Opportunitie: https://aclanthology.org/2023.emnlp-main.632.pdf
+  - A Comprehensive Study of Knowledge Editing for Large Language Models: https://arxiv.org/abs/2401.01286
   - (IKE) Can We Edit Factual Knowledge by In-Context Learning?: https://arxiv.org/abs/2305.12740
   - (ROME) Locating and Editing Factual Associations in GPT: https://arxiv.org/abs/2202.05262v5
   - UnKE: Unstructured Knowledge Editing in Large Language Models: https://arxiv.org/abs/2405.15349
