@@ -2,6 +2,8 @@
 # Author: Armit
 # Create Time: 2024/08/31 
 
+import warnings ; warnings.filterwarnings(category=UserWarning, action='ignore')
+
 import json
 
 from typing import Tuple, List, Dict
@@ -20,6 +22,35 @@ OrthDataset = List[OrthSample]
 Databank = Tuple[EditDataset, OrthDataset]
 
 mean = lambda x: sum(x) / len(x) if x else 0.0
+
+# LLM Leaderboard
+# - https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard
+# - https://huggingface.co/collections/open-llm-leaderboard/llm-leaderboard-best-models-652d6c7965a4619fb5c27a03
+# - https://www.datalearner.com/ai-models/leaderboard/datalearner-llm-leaderboard
+PRETRAINED_MODELS = [
+  # 国外模型
+  'mistralai/Mistral-7B-Instruct-v0.1',
+  'mistralai/Mistral-7B-Instruct-v0.2',
+  'mistralai/Mistral-7B-Instruct-v0.3',
+
+  # 国产模型
+  'Qwen/Qwen1.5-0.5B-Chat',
+  'Qwen/Qwen1.5-1.8B-Chat',
+  'Qwen/Qwen1.5-4B-Chat',
+  'Qwen/Qwen1.5-7B-Chat',
+  'Qwen/Qwen2-0.5B-Instruct',
+  'Qwen/Qwen2-1.5B-Instruct',
+  'Qwen/Qwen2-7B-Instruct',
+
+  'internlm/internlm2-chat-1_8b',
+  'internlm/internlm2-chat-7b',
+  'internlm/internlm2_5-1_8b-chat',
+  'internlm/internlm2_5-7b-chat',
+
+  'THUDM/chatglm-6b',
+  'THUDM/chatglm2-6b',
+  'THUDM/chatglm3-6b',
+]
 
 
 def load_rank_A_data() -> Databank:

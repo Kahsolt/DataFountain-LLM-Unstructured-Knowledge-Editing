@@ -16,13 +16,14 @@ from utils import *
 
 # https://huggingface.co/Qwen/Qwen1.5-7B-Chat
 model_path = 'Qwen/Qwen1.5-7B-Chat'
-max_new_tokens = 512
+max_new_tokens = 256
 
 ts_start = time()
 
 device = 'cuda:0'
 model: Qwen2ForCausalLM = AutoModelForCausalLM.from_pretrained(
   model_path,
+  trust_remote_code=True,
   #torch_dtype=torch.bfloat16, 
   bnb_4bit_quant_type='nf4',
   bnb_4bit_compute_dtype=torch.float16,
@@ -30,7 +31,10 @@ model: Qwen2ForCausalLM = AutoModelForCausalLM.from_pretrained(
   low_cpu_mem_usage=True,
   device_map=device,
 )
-tokenizer = AutoTokenizer.from_pretrained(model_path)
+tokenizer = AutoTokenizer.from_pretrained(
+  model_path,
+  trust_remote_code=True,
+)
 
 
 def query_model(prompt:str, maxlen:int=max_new_tokens) -> str:
