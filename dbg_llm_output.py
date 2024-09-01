@@ -59,7 +59,7 @@ for idx, it in enumerate(edit_data):
 
     # TODO: 你能修改的大概就是这个对话上下文里的提示，使得模型输出简短答案
     messages = [
-      {"role": "system", "content": "You are doing a reading comprehension task. Make answers very very short. Do not write a complete sentence. Answer in limited words."},
+      {"role": "system", "content": "You are doing a reading comprehension task. Remember to make answers very short. Do not write a complete sentence. Answer in limited words."},
       {"role": "user", "content": question},
       {"role": "assistant", "content": answer},
       {"role": "user", "content": "Extract answer for the following question based on the above context. Do not write a sentence, you can only extract the answer words from above context!"},

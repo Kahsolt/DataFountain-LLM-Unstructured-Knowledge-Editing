@@ -102,10 +102,10 @@ for it in tqdm(edit_data):
     print('ref_ans:', sub_answer[i] if sub_answer else None)
 
     messages = [
-      {"role": "system", "content": SYS_PROMPT},
+      {"role": "system", "content": "You are doing a reading comprehension task. Remember to make answers very short. Do not write a complete sentence. Answer in limited words."},
       {"role": "user", "content": question},
       {"role": "assistant", "content": answer},
-      {"role": "user", "content": "Answer the following question based on the above context, make it very short and brief."},
+      {"role": "user", "content": "Extract answer for the following question based on the above context. Do not write a sentence, you can only extract the answer words from above context!"},
       {"role": "user", "content": sub_q},
     ]
     resp = infer_model(messages)
