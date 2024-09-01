@@ -5,9 +5,12 @@
 # 测试脚本: 测试 multi-hop 问答，即把 question-answer 追加在 sub_question 之前作为上下文 
 # NOTE: 这个做法很有效！🎉
 
+from time import time
+
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers import PreTrainedModel
+from tqdm import tqdm
 
 from utils import *
 
@@ -26,6 +29,10 @@ mdoel_path = 'internlm/internlm2_5-7b-chat'
 model_path = 'internlm/internlm2_5-1_8b-chat'
 print('>> model_path:', model_path)
 
+SYS_PROMPT = "You are a helpful assistant doing reading comprehension tasks, make responses brief."
+MAX_NEW_TOKENS = 128
+
+ts_start = time()
 
 device = 'cuda:0'
 model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(
@@ -43,33 +50,74 @@ tokenizer = AutoTokenizer.from_pretrained(
   trust_remote_code=True,
 )
 
+
+def infer_model(messages:List[Dict]) -> str:
+  text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+  #print('>> processed text: ', text)
+  model_inputs = tokenizer([text], return_tensors="pt").to(device)
+  generated_ids = model.generate(model_inputs.input_ids, max_new_tokens=MAX_NEW_TOKENS)
+  generated_ids = [g[len(i):] for g, i in zip(generated_ids, model_inputs.input_ids)]
+  resp = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+  return resp
+
+
 print('\n\n')
 edit_data, orth_data = load_rank_A_data()
-for it in edit_data:
+for it in tqdm(edit_data):
   question     = it['question']
   answer       = it['answer']
   sub_question = it['sub_question']
-  sub_answer   = it['sub_answer']
+  sub_answer   = it.get('sub_answer')
 
+  # original q
+  print('[Question]')
+  messages = [
+    {"role": "system", "content": SYS_PROMPT},
+    {"role": "user", "content": question},
+  ]
+  it['original_prediction'] = infer_model(messages)
+
+  # para q
+  print(f'[Para-Question]')
+  messages = [
+    {"role": "system", "content": SYS_PROMPT},
+    {"role": "user", "content": it['para_question']},
+  ]
+  it['para_prediction'] = infer_model(messages)
+  messages = [
+    {"role": "system", "content": SYS_PROMPT},
+    {"role": "user", "content": it['para_question1']},
+  ]
+  it['para_prediction1'] = infer_model(messages)
+  messages = [
+    {"role": "system", "content": SYS_PROMPT},
+    {"role": "user", "content": it['para_question2']},
+  ]
+  it['para_prediction2'] = infer_model(messages)
+
+  # sub q
+  sub_p = []
   for i, sub_q in enumerate(sub_question):
     print(f'[Sub-Question {i}]')
-    print('ref_ans:', sub_answer[i])
+    print('ref_ans:', sub_answer[i] if sub_answer else None)
 
     messages = [
-      {"role": "system", "content": "You are a helpful assistant doing reading comprehension tasks."},
+      {"role": "system", "content": SYS_PROMPT},
       {"role": "user", "content": question},
       {"role": "assistant", "content": answer},
       {"role": "user", "content": "Answer the following question based on the above context, make it very short and brief."},
       {"role": "user", "content": sub_q},
     ]
-    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-    #print('>> processed text: ', text)
-    model_inputs = tokenizer([text], return_tensors="pt").to(device)
-    generated_ids = model.generate(model_inputs.input_ids, max_new_tokens=256)
-    generated_ids = [g[len(i):] for g, i in zip(generated_ids, model_inputs.input_ids)]
-    resp = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+    resp = infer_model(messages)
+    sub_p.append(resp)
     print('llm_ans:', resp)
-
     print('=' * 72)
+
+  it['sub_prediction'] = sub_p
   print('\n\n')
-  breakpoint()
+
+# NOTE: 临时做一版方案: prediction用原权重推理, sub_prediction用真值answer结合提示词上下文来实现
+save_infer_data(edit_data)
+
+ts_stop = time()
+print('>> time cost:', ts_stop - ts_start)    # 2826.5771272182465
