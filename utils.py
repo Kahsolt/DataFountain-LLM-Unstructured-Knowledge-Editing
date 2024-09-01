@@ -19,6 +19,8 @@ EditDataset = List[EditSample]
 OrthDataset = List[OrthSample]
 Databank = Tuple[EditDataset, OrthDataset]
 
+mean = lambda x: sum(x) / len(x) if x else 0.0
+
 
 def load_rank_A_data() -> Databank:
   edit_data: EditDataset = []   # n_samples = 100

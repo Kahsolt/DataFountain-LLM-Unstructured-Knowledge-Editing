@@ -1,12 +1,15 @@
+import sys
+sys.path.insert(0, '..')
+from utils import load_rank_A_data, save_infer_data
+
 import os
-import json
 import random
 from typing import List, Dict, Tuple
 
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, PreTrainedModel
 from transformers.modeling_attn_mask_utils import _prepare_4d_causal_attention_mask
 import numpy as np
 from tqdm import tqdm
@@ -41,9 +44,12 @@ def get_llama_without_answer_cot(que):
     return f"""<s>[INST] Please provide a multi-hop explanation for the next question : {que} [/INST] """
 
 def get_qwen_without_answer(que):
-    return f"""<|im_start|>user\n{que}<|im_end|>\n<|im_start|>assistant\n"""
+    #SYSTEM_PROMPT_QWEN = '<|im_start|>system\nYou are a helpful assistant.<|im_end|>\n'
+    #SYSTEM_PROMPT_QWEN = '<|im_start|>system\nYou are a helpful assistant doing reading comprehension tasks.<|im_end|>\n'
+    SYSTEM_PROMPT_QWEN = ''
+    return f"""{SYSTEM_PROMPT_QWEN}<|im_start|>user\n{que}<|im_end|>\n<|im_start|>assistant\n"""
 
-def get_list_llama_without_answer(que, cot):
+def get_list_llama_without_answer(que, cot=False):
     if cot == False:
         #L = [get_llama_sys_que(SYSTEM_PROMOT,line) for line in que]
         L = [get_llama_without_answer(line) for line in que]
@@ -51,7 +57,7 @@ def get_list_llama_without_answer(que, cot):
         L = [get_llama_without_answer_cot(line) for line in que]
     return L
 
-def get_list_qwen_without_answer(que, cot):
+def get_list_qwen_without_answer(que, cot=False):
     if cot == False:
         #L = [get_llama_sys_que(SYSTEM_PROMOT,line) for line in que]
         L = [get_qwen_without_answer(line) for line in que]
@@ -402,21 +408,18 @@ if __name__ == "__main__":
     set_seed()
     config = Config()
 
-    with open(config.data_path, 'r', encoding='utf-8') as fh:
-        edit_data = json.load(fh)
-    with open(config.ex_data_path, 'r', encoding='utf-8') as fh:
-        ex_data = json.load(fh)
-    #ex_data = [get_llama_without_answer(i['instruction'] + i['input']) + i['output'] for i in ex_data]
-    ex_data = [get_llama_without_answer(i['instruction'] + i['input']) for i in ex_data]
+    edit_data, ex_data = load_rank_A_data()
+    ex_data = [get_qwen_without_answer(i['question']) for i in ex_data]
+    #ex_data = [get_qwen_without_answer(i['instruction'] + i['input']) + i['output'] for i in ex_data]
 
-    model = AutoModelForCausalLM.from_pretrained(
+    model: PreTrainedModel = AutoModelForCausalLM.from_pretrained(
         config.model_path,
         device_map=f"cuda:{config.device}",
         torch_dtype=torch.bfloat16, 
         low_cpu_mem_usage=True,
     )
-    tok = AutoTokenizer.from_pretrained(config.model_path)
-    tokenizer = AutoTokenizer.from_pretrained(config.model_path, padding_side='left')
+    tok = AutoTokenizer.from_pretrained(config.model_path)                              # 训练用, bs = 1
+    tokenizer = AutoTokenizer.from_pretrained(config.model_path, padding_side='left')   # 推理用, bs > 1, 须右对齐
     if config.model_name == 'LLama2-7B-Chat':
         tok.pad_token_id = tok.eos_token_id
 
@@ -429,14 +432,16 @@ if __name__ == "__main__":
         start_index = batch_index * batch_size
         end_index = start_index + batch_size
         batch = edit_data[start_index:end_index]
-        for i in batch:
-            i['question'] = get_llama_without_answer(i['question'])
-            i['para_question'] = get_llama_without_answer(i['para_question'])
+        for it in batch:
+            it['question']       = get_qwen_without_answer(it['question'])
+            it['para_question']  = get_qwen_without_answer(it['para_question'])
+            it['para_question1'] = get_qwen_without_answer(it['para_question1'])
+            it['para_question2'] = get_qwen_without_answer(it['para_question2'])
+            it['sub_question']   = get_list_qwen_without_answer(it['sub_question'], cot=False)
             if config.model_name == 'LLama2-7B-Chat':
-                i['answer'] += '</s>'
+                it['answer'] += '</s>'
             elif config.model_name == 'Qwen1.5-7B-Chat':
-                i['answer'] += '<|im_end|>'
-            i['sub_question'] = get_list_llama_without_answer(i['sub_question'], False)
+                it['answer'] += '<|im_end|>'
         random_elements = random.sample(ex_data, config.ex_data_num)
 
         # Edit Knowledge!
@@ -444,14 +449,14 @@ if __name__ == "__main__":
 
         # Test original & paraphrase questions
         for data in batch:
-            question = tokenizer([data['question'], data['para_question']], return_tensors='pt', padding=True)
-            with torch.no_grad():
+            question = tokenizer([data['question'], data['para_question'], data['para_question1'], data['para_question2']], return_tensors='pt', padding=True)
+            with torch.inference_mode():
                 generated_ids = model.generate(
                     input_ids=question['input_ids'].to(device),
                     attention_mask=question['attention_mask'].to(device),
-                    do_sample=True,
-                    temperature=0.001,
-                    max_new_tokens=512,
+                    do_sample=False,
+                    #temperature=0.001,
+                    max_new_tokens=200,
                 )
             generated_ids = [output_ids[len(input_ids):] for input_ids, output_ids in zip(question['input_ids'], generated_ids)]
             output = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
@@ -462,22 +467,24 @@ if __name__ == "__main__":
                 print(f"question: {data['para_question']}")
                 print(output[1])
             data['original_prediction'] = output[0]
-            data['para_prediction'] = output[1]
-            if config.model_name == 'LLama2-7B-Chat':
-                data['answer'] = data['answer'][:-len('</s>')]
-            elif config.model_name == 'Qwen1.5-7B-Chat':
-                data['answer'] = data['answer'][:-len('<|im_end|>')]
+            data['para_prediction']     = output[1]
+            data['para_prediction1']    = output[2]
+            data['para_prediction2']    = output[3]
+            #if config.model_name == 'LLama2-7B-Chat':
+            #    data['answer'] = data['answer'][:-len('</s>')]
+            #elif config.model_name == 'Qwen1.5-7B-Chat':
+            #    data['answer'] = data['answer'][:-len('<|im_end|>')]
 
         # Test sub-questions
         for data in batch:
             question = tokenizer(data['sub_question'], return_tensors='pt', padding=True)
-            with torch.no_grad():
+            with torch.inference_mode():
                 generated_ids = model.generate(
                     input_ids=question['input_ids'].to(device),
                     attention_mask=question['attention_mask'].to(device),
-                    do_sample=True,
-                    temperature=0.001,
-                    max_new_tokens=512,
+                    do_sample=False,
+                    #temperature=0.001,
+                    max_new_tokens=100,
                 )
             generated_ids = [output_ids[len(input_ids):] for input_ids, output_ids in zip(question['input_ids'], generated_ids)]
             output = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)
@@ -485,16 +492,13 @@ if __name__ == "__main__":
             if batch_index < 10 // config.batch_size + 1:
                 print(f"question: {data['sub_question']}")
                 print(output)
-            data['sub_pred'] = output
+            data['sub_prediction'] = output
 
         edited_data.extend(batch)
 
-        if config.keep_original_weight:
+        if config.keep_original_weight:     # single edit
             with torch.no_grad():
                 for k, v in weights_copy.items():
                     nethook.get_parameter(model, k)[...] = v.to(f"cuda:{config.device}")
 
-    path = '../output/result_bs1_ex20_step50_s_qwen2.json'
-    with open(path, 'w', encoding='utf-8') as fh: 
-        json.dump(edited_data, fh, ensure_ascii=False, indent=4)
-    print(f"saving to {path}")
+    save_infer_data(edit_data)

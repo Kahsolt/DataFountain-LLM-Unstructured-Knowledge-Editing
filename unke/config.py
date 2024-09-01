@@ -7,7 +7,7 @@ class Config:
     model_path = 'Qwen/Qwen1.5-7B-Chat'
 
     ''' Data '''
-    data_path = '../data/final_data_v2.json'
+    data_path = '../data/final_test_data_a.json'
     ex_data_path = '../data/alpaca_data.json'
 
     ''' Train '''
