@@ -17,7 +17,7 @@ from utils import *
 
 def infer_llm(prompt:str, model:PreTrainedModel, tokenizer:AutoTokenizer, maxlen:int=256):
   messages = [
-    {"role": "system", "content": "You are a helpful assistant"},
+    {"role": "system", "content": "You are a helpful assistant. You are facing a knowledge contest. Please anser in English. Make answers very short. Do not explain the reason. Do not answer in a complete sentence. Answer in single words. Only point out the direct answer. Do not repeat yourself."},
     {"role": "user", "content": prompt},
   ]
   text = tokenizer.apply_chat_template(
@@ -33,7 +33,8 @@ def infer_llm(prompt:str, model:PreTrainedModel, tokenizer:AutoTokenizer, maxlen
 
 
 def run():
-  model_path = 'internlm/internlm2_5-1_8b-chat'
+  model_path = 'Qwen/Qwen1.5-7b-Chat'
+  #model_path = 'internlm/internlm2_5-1_8b-chat'
   max_new_tokens = 256
 
   device = 'cuda:0'
