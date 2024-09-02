@@ -18,7 +18,7 @@ Team Name: 一个十连当场失忆
 | model | method | submit score |
 | :-: | :-: | :-: |
 | Qwen1.5-7B-Chat | dummy | 0.44495002693 |
-| internlm/internlm2_5-1_8b-chat | dummy | 0.46533768566 |
+| internlm/internlm2_5-1_8b-chat | dummy | 0.54783768566 |
 
 
 #### refenrence

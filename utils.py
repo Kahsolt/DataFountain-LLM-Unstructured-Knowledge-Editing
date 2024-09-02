@@ -14,6 +14,7 @@ DATA_PATH = BASE_PATH / 'data'
 OUT_PATH = BASE_PATH / 'out'
 RANK_A_DATA_FILE = DATA_PATH / 'final_test_data_a.json'
 DEFAULT_OUT_FILE = OUT_PATH / 'submit.json'
+DEFAULT_OUT_ORTH_FILE = OUT_PATH / 'submit_orth.json'
 
 EditSample = Tuple[Dict]   # (id, question, para_question*, sub_question, sub_answer)
 OrthSample = Tuple[Dict]   # {id, question}
@@ -90,6 +91,24 @@ def save_infer_data(samples:EditDataset, fp:Path=None):
       'para_prediction1',
       'para_prediction2',
       'sub_prediction',
+    }
+
+  print(f'>> write json: {fp}')
+  with open(fp, 'w', encoding='utf-8') as fh:
+    json.dump(samples, fh, indent=2, ensure_ascii=False)
+
+
+def save_infer_orth_data(samples:OrthDataset, fp:Path=None):
+  fp = fp or DEFAULT_OUT_ORTH_FILE
+  fp.parent.mkdir(exist_ok=True)
+
+  assert isinstance(samples, list)
+  for it in samples:
+    assert isinstance(it, dict)
+    assert set(it.keys()) == {
+      'id',
+      'question',
+      'prediction',
     }
 
   print(f'>> write json: {fp}')
