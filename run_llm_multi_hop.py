@@ -14,17 +14,17 @@ from tqdm import tqdm
 
 from utils import *
 
-mdoel_path = 'Qwen/Qwen1.5-0.5B-Chat'
-mdoel_path = 'Qwen/Qwen1.5-1.8B-Chat'
-mdoel_path = 'Qwen/Qwen1.5-4B-Chat'
-mdoel_path = 'Qwen/Qwen1.5-7B-Chat'             # <- tested good 
-mdoel_path = 'Qwen/Qwen2-0.5B-Instruct'
-mdoel_path = 'Qwen/Qwen2-1.5B-Instruct'
-mdoel_path = 'Qwen/Qwen2-7B-Instruct'
-mdoel_path = 'internlm/internlm2-chat-1_8b'
-mdoel_path = 'internlm/internlm2-chat-7b'
-mdoel_path = 'internlm/internlm2_5-1_8b-chat'   # <- tested good 
-mdoel_path = 'internlm/internlm2_5-7b-chat'
+model_path = 'Qwen/Qwen1.5-0.5B-Chat'
+model_path = 'Qwen/Qwen1.5-1.8B-Chat'
+model_path = 'Qwen/Qwen1.5-4B-Chat'
+model_path = 'Qwen/Qwen1.5-7B-Chat'             # <- tested good 
+model_path = 'Qwen/Qwen2-0.5B-Instruct'
+model_path = 'Qwen/Qwen2-1.5B-Instruct'
+model_path = 'Qwen/Qwen2-7B-Instruct'
+model_path = 'internlm/internlm2-chat-1_8b'
+model_path = 'internlm/internlm2-chat-7b'
+model_path = 'internlm/internlm2_5-1_8b-chat'   # <- tested good 
+model_path = 'internlm/internlm2_5-7b-chat'
 
 model_path = 'internlm/internlm2_5-1_8b-chat'
 print('>> model_path:', model_path)
