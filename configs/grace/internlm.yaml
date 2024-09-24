@@ -1,0 +1,33 @@
+alg_name: GRACE
+model_name: internlm/internlm2_5-1_8b-chat
+device: 0
+
+inner_params:
+  - model.layers[7].attention.wqkv
+  - model.layers[7].attention.wo
+  - model.layers[7].feed_forward.w1
+  - model.layers[7].feed_forward.w2
+  - model.layers[7].feed_forward.w3
+  - model.layers[15].attention.wqkv
+  - model.layers[15].attention.wo
+  - model.layers[15].feed_forward.w1
+  - model.layers[15].feed_forward.w2
+  - model.layers[15].feed_forward.w3
+  - model.layers[23].attention.wqkv
+  - model.layers[23].attention.wo
+  - model.layers[23].feed_forward.w1
+  - model.layers[23].feed_forward.w2
+  - model.layers[23].feed_forward.w3
+
+edit_lr: 1.0
+n_iter: 50
+eps: 1.0
+dist_fn: euc # euc, mmd, cos
+val_init: cold # cold, warm
+val_train: sgd # sgd, pert
+val_reg: None # early
+reg: early_stop # early_stop
+replacement: replace_last # replace_last, replace_all, replace_prompt
+eps_expand: coverage # , moving_avg, decay
+num_pert: 8 # only matters when using perturbation training
+dropout: 0.0

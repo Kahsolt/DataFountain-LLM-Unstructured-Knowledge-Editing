@@ -4,13 +4,16 @@
 
 ----
 
+⚠ 弃赛了，本仓库请勿使用！
+
 Contest page: https://www.datafountain.cn/competitions/1031  
 Team Name: 一个十连当场失忆  
 
 
 ### Quickstart
 
-- ???
+- `repo\init_repos.cmd`
+- `python run_easyeditor_LoRA.py`
 
 
 ### Experiments

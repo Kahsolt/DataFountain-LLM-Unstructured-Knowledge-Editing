@@ -14,6 +14,7 @@ repo/*
 log/
 logs/
 *.log
+out/*.ckpt
 
 # info
 TEAM.txt

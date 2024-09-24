@@ -17,7 +17,7 @@ from utils import *
 
 def infer_llm(prompt:str, model:PreTrainedModel, tokenizer:AutoTokenizer, maxlen:int=256):
   messages = [
-    {"role": "system", "content": "You are a helpful assistant. You are facing a knowledge contest. Please anser in English. Make answers very short. Do not explain the reason. Do not answer in a complete sentence. Answer in single words. Only point out the direct answer. Do not repeat yourself."},
+    {"role": "system", "content": "You are a helpful assistant. You are facing a knowledge contest. Please answer in English. Make answers very short. Do not explain the reason. Do not answer in a complete sentence. Answer in single words. Only point out the direct answer. Do not repeat yourself."},
     {"role": "user", "content": prompt},
   ]
   text = tokenizer.apply_chat_template(
