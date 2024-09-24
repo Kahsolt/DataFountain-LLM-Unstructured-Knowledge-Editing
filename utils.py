@@ -13,6 +13,7 @@ BASE_PATH = Path(__file__).parent
 DATA_PATH = BASE_PATH / 'data'
 OUT_PATH = BASE_PATH / 'out'
 RANK_A_DATA_FILE = DATA_PATH / 'final_test_data_a.json'
+RANK_B1_DATA_FILE = DATA_PATH / 'final_test_data_b_1.json'
 DEFAULT_OUT_FILE = OUT_PATH / 'submit.json'
 DEFAULT_OUT_ORTH_FILE = OUT_PATH / 'submit_orth.json'
 
@@ -54,10 +55,10 @@ PRETRAINED_MODELS = [
 ]
 
 
-def load_rank_A_data() -> Databank:
+def load_data(fp:Path) -> Databank:
   edit_data: EditDataset = []   # n_samples = 100
   orth_data: OrthDataset = []   # n_samples = 400
-  with open(RANK_A_DATA_FILE, encoding='utf-8') as fh:
+  with open(fp, encoding='utf-8') as fh:
     records = json.load(fh)
     for rec in records:
       id: str = rec['id']
@@ -68,6 +69,9 @@ def load_rank_A_data() -> Databank:
       else:
         raise ValueError(f'unknown record struct: {rec}')
   return edit_data, orth_data
+
+load_rank_A_data  = lambda: load_data(RANK_A_DATA_FILE)
+load_rank_B1_data = lambda: load_data(RANK_B1_DATA_FILE)
 
 
 def save_infer_data(samples:EditDataset, fp:Path=None):
